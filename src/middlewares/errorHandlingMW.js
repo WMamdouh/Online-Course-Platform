@@ -1,16 +1,3 @@
-/**
- * errorHandlingMW – Global Error Handler
- * ────────────────────────────────────────
- * Must be the LAST middleware registered in app.js.
- * Express identifies it as an error handler because it has 4 parameters (err, req, res, next).
- *
- * Handles:
- *   - HTTPError (our custom errors with .status)
- *   - Mongoose ValidationError (schema-level validation failures)
- *   - Mongoose Duplicate Key Error (code 11000)
- *   - Express-validator errors (attached as .errors on HTTPError)
- *   - Unhandled errors (500 Internal Server Error)
- */
 export default (err, req, res, next) => {
   console.error("Error:", err.message);
   if (process.env.NODE_ENV === "development") console.error(err.stack);

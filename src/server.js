@@ -2,12 +2,10 @@ import app from "./app.js";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
-// Load environment variables from .env file into process.env
 dotenv.config();
 
 
 
-// ── Connect to MongoDB ────────────────────────────────────────────────────────
 const MONGO_URI = process.env.MONGO_URI;
 
 mongoose
@@ -22,7 +20,6 @@ mongoose
 
 
 
-// ── Start Express Server ──────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

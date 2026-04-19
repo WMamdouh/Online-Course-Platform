@@ -1,0 +1,64 @@
+<div class="auth-page">
+  <div class="auth-card animate-fade-in-up">
+
+    <!-- Header -->
+    <div class="auth-header">
+      <div class="auth-logo">🎓</div>
+      <h1>Welcome back</h1>
+      <p>Sign in to continue learning</p>
+    </div>
+
+    <!-- Error Alert -->
+    <div *ngIf="errorMsg" class="alert alert-error">
+      <span>⚠</span> {{ errorMsg }}
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input formControlName="email" type="email"
+               class="form-input" [class.invalid]="email.touched && email.invalid"
+               placeholder="you@example.com" autocomplete="email" />
+        <div class="form-error" *ngIf="email.touched && email.errors?.['required']">
+          Email is required
+        </div>
+        <div class="form-error" *ngIf="email.touched && email.errors?.['email']">
+          Please enter a valid email
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input formControlName="password" type="password"
+               class="form-input" [class.invalid]="password.touched && password.invalid"
+               placeholder="••••••••" autocomplete="current-password" />
+        <div class="form-error" *ngIf="password.touched && password.errors?.['required']">
+          Password is required
+        </div>
+        <div class="form-error" *ngIf="password.touched && password.errors?.['minlength']">
+          Password must be at least 8 characters
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="loading">
+        <span *ngIf="loading" class="btn-spinner"></span>
+        {{ loading ? 'Signing in…' : 'Sign In' }}
+      </button>
+    </form>
+
+    <p class="auth-footer">
+      Don't have an account?
+      <a routerLink="/register">Create one free</a>
+    </p>
+
+    <!-- Demo credentials hint -->
+    <div class="demo-hint">
+      <p class="demo-title">Demo accounts (from seed script)</p>
+      <div class="demo-row"><span class="badge badge-red">Admin</span> admin&#64;example.com / admin12345</div>
+      <div class="demo-row"><span class="badge badge-blue">Instructor</span> instructor&#64;example.com / instructor12345</div>
+      <div class="demo-row"><span class="badge badge-green">Student</span> student&#64;example.com / student12345</div>
+    </div>
+  </div>
+</div>

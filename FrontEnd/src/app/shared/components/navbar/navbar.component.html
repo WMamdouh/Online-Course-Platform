@@ -1,0 +1,73 @@
+<nav class="navbar">
+  <div class="navbar-inner container">
+
+    <!-- Logo -->
+    <a routerLink="/courses" class="navbar-logo" (click)="closeMobile()">
+      <span class="logo-icon">🎓</span>
+      <span class="logo-text">EduPlatform</span>
+    </a>
+
+    <!-- Desktop Nav Links -->
+    <div class="navbar-links hide-mobile">
+      <a routerLink="/courses" routerLinkActive="nav-active"
+         [routerLinkActiveOptions]="{exact:true}" class="nav-link">
+        Courses
+      </a>
+
+      <ng-container *ngIf="auth.isLoggedIn()">
+        <a [routerLink]="getDashboardRoute()" routerLinkActive="nav-active" class="nav-link">
+          {{ auth.isStudent() ? 'My Learning' : auth.isInstructor() ? 'My Courses' : 'Admin' }}
+        </a>
+        <a *ngIf="auth.isInstructor() || auth.isAdmin()"
+           routerLink="/courses/new" routerLinkActive="nav-active" class="nav-link">
+          + New Course
+        </a>
+      </ng-container>
+    </div>
+
+    <!-- Desktop Auth Buttons -->
+    <div class="navbar-auth hide-mobile">
+      <ng-container *ngIf="auth.isLoggedIn(); else guestButtons">
+        <div class="user-pill">
+          <span class="user-avatar">{{ auth.currentUser()?.name?.charAt(0)?.toUpperCase() }}</span>
+          <span class="user-name">{{ auth.currentUser()?.name }}</span>
+          <span class="badge badge-amber">{{ auth.currentUser()?.role }}</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" (click)="logout()">Sign out</button>
+      </ng-container>
+
+      <ng-template #guestButtons>
+        <a routerLink="/login"    class="btn btn-ghost btn-sm">Login</a>
+        <a routerLink="/register" class="btn btn-primary btn-sm">Sign Up</a>
+      </ng-template>
+    </div>
+
+    <!-- Mobile Hamburger -->
+    <button class="hamburger" (click)="toggleMobile()" aria-label="Menu">
+      <span [class.open]="mobileOpen()">☰</span>
+    </button>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" [class.mobile-menu-open]="mobileOpen()">
+    <a routerLink="/courses"   class="mobile-link" (click)="closeMobile()">Courses</a>
+
+    <ng-container *ngIf="auth.isLoggedIn()">
+      <a [routerLink]="getDashboardRoute()" class="mobile-link" (click)="closeMobile()">
+        {{ auth.isStudent() ? 'My Learning' : auth.isInstructor() ? 'My Courses' : 'Admin' }}
+      </a>
+      <a *ngIf="auth.isInstructor() || auth.isAdmin()"
+         routerLink="/courses/new" class="mobile-link" (click)="closeMobile()">
+        + New Course
+      </a>
+      <div class="mobile-divider"></div>
+      <button class="mobile-link mobile-logout" (click)="logout()">Sign out</button>
+    </ng-container>
+
+    <ng-container *ngIf="!auth.isLoggedIn()">
+      <div class="mobile-divider"></div>
+      <a routerLink="/login"    class="mobile-link" (click)="closeMobile()">Login</a>
+      <a routerLink="/register" class="mobile-link" (click)="closeMobile()">Sign Up</a>
+    </ng-container>
+  </div>
+</nav>

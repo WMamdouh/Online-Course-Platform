@@ -1,0 +1,213 @@
+<!-- Loading -->
+<div *ngIf="loading" class="loading-wrapper">
+  <div class="spinner"></div><p>Loading course…</p>
+</div>
+
+<!-- Error -->
+<div *ngIf="errorMsg && !loading" class="container section">
+  <div class="alert alert-error">{{ errorMsg }}</div>
+  <a routerLink="/courses" class="btn btn-outline">← Back to courses</a>
+</div>
+
+<!-- Content -->
+<div *ngIf="course && !loading">
+
+  <!-- Hero Banner -->
+  <div class="course-hero">
+    <div class="hero-bg" [style.backgroundImage]="course.thumbnail ? 'url('+course.thumbnail+')' : 'none'"></div>
+    <div class="hero-overlay"></div>
+    <div class="container hero-content animate-fade-in-up">
+
+      <div class="hero-meta">
+        <span class="badge badge-amber">{{ course.category }}</span>
+        <span *ngIf="!course.isPublished" class="badge badge-muted">Draft</span>
+      </div>
+
+      <h1 class="hero-title">{{ course.title }}</h1>
+      <p class="hero-desc">{{ course.description | slice:0:150 }}{{ course.description.length > 150 ? '…' : '' }}</p>
+
+      <div class="hero-stats">
+        <div class="stat-item">
+          <app-star-rating [value]="course.averageRating" [showValue]="true" />
+          <span class="stat-label">({{ course.ratings.length }} reviews)</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">📖</span>
+          <span>{{ lessons.length }} lessons</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">⏱</span>
+          <span>{{ totalDuration() }} min total</span>
+        </div>
+      </div>
+
+      <div class="hero-instructor">
+        <div class="inst-avatar-lg">{{ getInstructorName().charAt(0) }}</div>
+        <div>
+          <div class="inst-label">Instructor</div>
+          <div class="inst-name-lg">{{ getInstructorName() }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Body -->
+  <div class="container course-body">
+
+    <!-- Left: Description + Lessons -->
+    <div class="course-main">
+
+      <!-- About -->
+      <section class="course-section">
+        <h2>About this course</h2>
+        <p>{{ course.description }}</p>
+      </section>
+
+      <!-- Lessons List -->
+      <section class="course-section">
+        <h2>Course Content</h2>
+        <div *ngIf="lessons.length === 0" class="empty-state">
+          <p>No lessons added yet.</p>
+        </div>
+        <div class="lessons-list">
+          <div *ngFor="let lesson of lessons; let i = index" class="lesson-row">
+            <div class="lesson-num">{{ lesson.order }}</div>
+            <div class="lesson-info">
+              <span class="lesson-title">{{ lesson.title }}</span>
+              <span *ngIf="!lesson.isPublished" class="badge badge-muted" style="font-size:10px">Draft</span>
+            </div>
+            <div class="lesson-duration">
+              <span>{{ lesson.duration || 0 }} min</span>
+            </div>
+            <!-- Link to lesson if enrolled or owner or admin -->
+            <a *ngIf="isEnrolled || isOwner() || auth.isAdmin()"
+               [routerLink]="['/courses', course!._id, 'lessons', lesson._id]"
+               class="btn btn-ghost btn-sm">
+              View →
+            </a>
+            <span *ngIf="!isEnrolled && !isOwner() && !auth.isAdmin()" class="lesson-lock">🔒</span>
+          </div>
+        </div>
+
+        <!-- Add lesson button for instructor/admin -->
+        <a *ngIf="isOwner() || auth.isAdmin()"
+           [routerLink]="['/courses', course!._id, 'lessons', 'new']"
+           class="btn btn-outline mt-3">
+          + Add Lesson
+        </a>
+      </section>
+
+      <!-- Ratings Section -->
+      <section class="course-section">
+        <h2>Student Reviews</h2>
+
+        <!-- Rating summary -->
+        <div class="rating-summary" *ngIf="course.ratings.length > 0">
+          <div class="rating-big">{{ course.averageRating | number:'1.1-1' }}</div>
+          <div>
+            <app-star-rating [value]="course.averageRating" />
+            <div class="text-muted" style="font-size:13px; margin-top:4px">
+              {{ course.ratings.length }} review{{ course.ratings.length !== 1 ? 's' : '' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Rating form -->
+        <div *ngIf="isEnrolled && auth.isStudent()">
+          <button class="btn btn-outline btn-sm" (click)="showRatingForm = !showRatingForm">
+            {{ userRating ? 'Update your rating' : 'Rate this course' }}
+          </button>
+
+          <div *ngIf="showRatingForm" class="rating-form">
+            <p class="form-label">Your rating</p>
+            <app-star-rating [value]="ratingValue" [interactive]="true" (rated)="onRated($event)" />
+            <textarea [(ngModel)]="ratingReview" class="form-textarea mt-2"
+                      placeholder="Write a review (optional)…" rows="3"></textarea>
+            <div *ngIf="ratingMsg" class="alert alert-success mt-2">{{ ratingMsg }}</div>
+            <button class="btn btn-primary mt-2" (click)="submitRating()" [disabled]="ratingLoading || ratingValue === 0">
+              {{ ratingLoading ? 'Submitting…' : 'Submit Rating' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Reviews list -->
+        <div class="reviews-list">
+          <div *ngFor="let rating of course.ratings" class="review-card">
+            <div class="review-header">
+              <div class="review-avatar">
+                {{ ($any(rating.user).name || 'U').charAt(0) }}
+              </div>
+              <div>
+                <div class="review-name">{{ $any(rating.user).name || 'Student' }}</div>
+                <app-star-rating [value]="rating.value" />
+              </div>
+            </div>
+            <p *ngIf="rating.review" class="review-text">{{ rating.review }}</p>
+          </div>
+          <p *ngIf="course.ratings.length === 0" class="text-muted">No reviews yet. Be the first!</p>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right: Sidebar -->
+    <aside class="course-sidebar">
+      <div class="sidebar-card">
+
+        <!-- Price -->
+        <div class="sidebar-price">
+          {{ course.price === 0 ? 'Free' : '$' + course.price }}
+        </div>
+
+        <!-- Enroll messages -->
+        <div *ngIf="enrollMsg" class="alert"
+             [class.alert-success]="isEnrolled"
+             [class.alert-error]="!isEnrolled">
+          {{ enrollMsg }}
+        </div>
+
+        <!-- Student: Enroll / Unenroll -->
+        <ng-container *ngIf="auth.isStudent()">
+          <button *ngIf="!isEnrolled" class="btn btn-primary btn-full btn-lg"
+                  (click)="enroll()" [disabled]="enrollLoading">
+            {{ enrollLoading ? 'Enrolling…' : 'Enroll Now' }}
+          </button>
+          <div *ngIf="isEnrolled" class="enrolled-badge">
+            <span>✓ You are enrolled</span>
+          </div>
+          <button *ngIf="isEnrolled" class="btn btn-ghost btn-full btn-sm mt-2"
+                  (click)="unenroll()" [disabled]="enrollLoading">
+            Unenroll
+          </button>
+        </ng-container>
+
+        <!-- Instructor: Edit -->
+        <ng-container *ngIf="isOwner() || auth.isAdmin()">
+          <a [routerLink]="['/courses', course!._id, 'edit']"
+             class="btn btn-outline btn-full">Edit Course</a>
+          <a [routerLink]="['/courses', course!._id, 'lessons', 'new']"
+             class="btn btn-primary btn-full mt-2">+ Add Lesson</a>
+        </ng-container>
+
+        <!-- Not logged in -->
+        <ng-container *ngIf="!auth.isLoggedIn()">
+          <a routerLink="/login" class="btn btn-primary btn-full btn-lg">Login to Enroll</a>
+        </ng-container>
+
+        <!-- Meta -->
+        <div class="sidebar-meta">
+          <div class="meta-row"><span>📖 Lessons</span><strong>{{ lessons.length }}</strong></div>
+          <div class="meta-row"><span>⏱ Duration</span><strong>{{ totalDuration() }} min</strong></div>
+          <div class="meta-row"><span>⭐ Rating</span><strong>{{ course.averageRating | number:'1.1-1' }} / 5</strong></div>
+          <div class="meta-row">
+            <span>📡 Status</span>
+            <span class="badge" [class.badge-green]="course.isPublished" [class.badge-muted]="!course.isPublished">
+              {{ course.isPublished ? 'Published' : 'Draft' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</div>

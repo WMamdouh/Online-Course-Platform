@@ -1,0 +1,56 @@
+<div class="container section">
+
+  <!-- Hero -->
+  <div class="hero animate-fade-in-up">
+    <h1>Explore <span class="text-accent">Courses</span></h1>
+    <p>Expand your skills with expert-led courses</p>
+  </div>
+
+  <!-- Search & Filter Bar -->
+  <div class="search-bar animate-fade-in-up">
+    <div class="search-input-wrap">
+      <span class="search-icon">🔍</span>
+      <input [(ngModel)]="search" (keyup.enter)="onSearch()"
+             type="text" placeholder="Search courses…" class="form-input search-input" />
+    </div>
+
+    <select [(ngModel)]="category" (change)="onFilter()" class="form-select category-select">
+      <option value="">All Categories</option>
+      <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+    </select>
+
+    <button class="btn btn-primary" (click)="onSearch()">Search</button>
+    <button *ngIf="search || category" class="btn btn-ghost" (click)="clearSearch()">Clear</button>
+  </div>
+
+  <!-- Results count -->
+  <div class="results-info" *ngIf="!loading">
+    <span *ngIf="total > 0">{{ total }} course{{ total !== 1 ? 's' : '' }} found</span>
+    <span *ngIf="total === 0 && !errorMsg">No courses found</span>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMsg" class="alert alert-error">{{ errorMsg }}</div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-wrapper">
+    <div class="spinner"></div>
+    <p>Loading courses…</p>
+  </div>
+
+  <!-- Grid -->
+  <div *ngIf="!loading && courses.length > 0" class="grid-3 animate-fade-in">
+    <app-course-card *ngFor="let course of courses" [course]="course" />
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && courses.length === 0 && !errorMsg" class="empty-state">
+    <div class="empty-state-icon">📭</div>
+    <h3>No courses found</h3>
+    <p>Try adjusting your search or filter</p>
+    <button class="btn btn-outline mt-3" (click)="clearSearch()">Clear filters</button>
+  </div>
+
+  <!-- Pagination -->
+  <app-pagination [current]="page" [pages]="pages" (pageChange)="goToPage($event)" />
+</div>

@@ -1,0 +1,79 @@
+<div class="container section animate-fade-in-up">
+
+  <div class="dash-header">
+    <div>
+      <h1>Instructor Dashboard</h1>
+      <p>Manage your courses, <span class="text-accent">{{ auth.currentUser()?.name }}</span></p>
+    </div>
+    <a routerLink="/courses/new" class="btn btn-primary">+ Create Course</a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num">{{ courses.length }}</div><div class="stat-label">Total Courses</div></div>
+    <div class="stat-card"><div class="stat-num text-success">{{ publishedCount() }}</div><div class="stat-label">Published</div></div>
+    <div class="stat-card"><div class="stat-num">{{ draftCount() }}</div><div class="stat-label">Drafts</div></div>
+    <div class="stat-card"><div class="stat-num text-accent">{{ avgRating() }}</div><div class="stat-label">Avg. Rating</div></div>
+  </div>
+
+  <div *ngIf="deleteMsg" class="alert alert-info">{{ deleteMsg }}</div>
+  <div *ngIf="loading"   class="loading-wrapper"><div class="spinner"></div></div>
+  <div *ngIf="errorMsg"  class="alert alert-error">{{ errorMsg }}</div>
+
+  <!-- Courses Table -->
+  <div *ngIf="!loading">
+    <h2 class="section-title">My Courses</h2>
+
+    <div *ngIf="courses.length === 0" class="empty-state">
+      <div class="empty-state-icon">🎓</div>
+      <h3>No courses yet</h3>
+      <p>Create your first course to start teaching</p>
+      <a routerLink="/courses/new" class="btn btn-primary mt-3">Create Course</a>
+    </div>
+
+    <div class="courses-table" *ngIf="courses.length > 0">
+      <div class="table-header">
+        <span>Course</span>
+        <span class="hide-mobile">Category</span>
+        <span class="hide-mobile">Status</span>
+        <span class="hide-mobile">Rating</span>
+        <span>Actions</span>
+      </div>
+
+      <div *ngFor="let course of courses" class="table-row">
+        <!-- Thumb + Title -->
+        <div class="course-cell">
+          <div class="course-thumb-sm">
+            <img *ngIf="course.thumbnail" [src]="course.thumbnail" [alt]="course.title" />
+            <span *ngIf="!course.thumbnail">📚</span>
+          </div>
+          <div>
+            <div class="course-name">{{ course.title }}</div>
+            <div class="course-price">${{ course.price }}</div>
+          </div>
+        </div>
+
+        <span class="hide-mobile">
+          <span class="badge badge-amber">{{ course.category }}</span>
+        </span>
+
+        <span class="hide-mobile">
+          <span class="badge" [class.badge-green]="course.isPublished" [class.badge-muted]="!course.isPublished">
+            {{ course.isPublished ? 'Published' : 'Draft' }}
+          </span>
+        </span>
+
+        <span class="hide-mobile rating-cell">
+          ⭐ {{ course.averageRating | number:'1.1-1' }}
+        </span>
+
+        <div class="actions-cell">
+          <a [routerLink]="['/courses', course._id]"         class="btn btn-ghost btn-sm">View</a>
+          <a [routerLink]="['/courses', course._id, 'edit']" class="btn btn-outline btn-sm">Edit</a>
+          <button class="btn btn-danger btn-sm" (click)="deleteCourse(course)">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

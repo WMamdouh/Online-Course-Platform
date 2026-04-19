@@ -20,8 +20,8 @@ export const getAllCourses = async (req, res, next) => {
     }
 
     const courses = await Course.find(filter)
-      .populate("instructor", "name email avatar") // show instructor info
-      .select("-ratings")                           // hide full ratings array in list
+      .populate("instructor", "name email avatar")
+      .select("-ratings")
       .skip(skip)
       .limit(limit)
       .lean();

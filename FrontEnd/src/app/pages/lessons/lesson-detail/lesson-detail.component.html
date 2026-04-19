@@ -1,0 +1,127 @@
+<div *ngIf="loading" class="loading-wrapper"><div class="spinner"></div><p>Loading lesson…</p></div>
+<div *ngIf="errorMsg && !loading" class="container section"><div class="alert alert-error">{{ errorMsg }}</div></div>
+
+<div *ngIf="lesson && !loading" class="lesson-page">
+  <div class="container">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb animate-fade-in">
+      <a [routerLink]="['/courses', courseId]" class="breadcrumb-link">← Back to Course</a>
+      <span class="breadcrumb-sep">/</span>
+      <span>Lesson {{ lesson.order }}: {{ lesson.title }}</span>
+    </nav>
+
+    <div class="lesson-layout">
+
+      <!-- Main Content -->
+      <div class="lesson-main animate-fade-in-up">
+
+        <!-- Video Player -->
+        <div *ngIf="lesson.videoUrl" class="video-wrap">
+          <iframe [src]="lesson.videoUrl" frameborder="0" allowfullscreen
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+          </iframe>
+        </div>
+        <div *ngIf="!lesson.videoUrl" class="video-placeholder">
+          <span>🎬</span>
+          <p>No video for this lesson</p>
+        </div>
+
+        <!-- Lesson Info -->
+        <div class="lesson-header">
+          <div class="lesson-meta-row">
+            <span class="badge badge-amber">Lesson {{ lesson.order }}</span>
+            <span class="badge" [class.badge-green]="lesson.isPublished" [class.badge-muted]="!lesson.isPublished">
+              {{ lesson.isPublished ? 'Published' : 'Draft' }}
+            </span>
+            <span class="meta-duration">⏱ {{ lesson.duration }} min</span>
+          </div>
+          <h1 class="lesson-title">{{ lesson.title }}</h1>
+        </div>
+
+        <!-- Content -->
+        <div class="lesson-content">
+          <h3>Lesson Content</h3>
+          <p style="white-space: pre-wrap;">{{ lesson.content }}</p>
+        </div>
+
+        <!-- Progress Section (Student only) -->
+        <div *ngIf="auth.isStudent()" class="progress-section">
+          <div *ngIf="progressMsg" class="alert" [class.alert-success]="completed" [class.alert-info]="!completed">
+            {{ progressMsg }}
+          </div>
+          <div *ngIf="completed" class="progress-bar mb-2">
+            <div class="progress-bar-fill" [style.width.%]="progressPercent"></div>
+          </div>
+          <button *ngIf="!completed" class="btn btn-primary" (click)="markComplete()">
+            ✓ Mark as Complete
+          </button>
+          <div *ngIf="completed" class="completed-badge">✓ Completed!</div>
+        </div>
+
+        <!-- Instructor Actions -->
+        <div *ngIf="auth.isInstructor() || auth.isAdmin()" class="instructor-actions">
+          <a [routerLink]="['/courses', courseId, 'lessons', lessonId, 'edit']"
+             class="btn btn-outline">Edit Lesson</a>
+        </div>
+
+        <!-- Comments Section -->
+        <section class="comments-section">
+          <h2>Discussion ({{ comments.length }})</h2>
+
+          <!-- Add Comment -->
+          <div *ngIf="auth.isLoggedIn()" class="add-comment">
+            <div class="comment-avatar">{{ auth.currentUser()?.name?.charAt(0) }}</div>
+            <div class="comment-input-wrap">
+              <textarea [(ngModel)]="newComment" class="form-textarea"
+                        placeholder="Share your thoughts or ask a question…"
+                        rows="3"></textarea>
+              <div *ngIf="commentMsg" class="alert alert-error mt-1">{{ commentMsg }}</div>
+              <button class="btn btn-primary btn-sm mt-2"
+                      (click)="addComment()" [disabled]="commentLoading || !newComment.trim()">
+                {{ commentLoading ? 'Posting…' : 'Post Comment' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Comments List -->
+          <div class="comments-list">
+            <div *ngFor="let comment of comments" class="comment-item">
+              <div class="comment-avatar">{{ getUserInitial(comment) }}</div>
+              <div class="comment-body">
+                <div class="comment-header">
+                  <span class="comment-author">{{ getUsername(comment) }}</span>
+                  <span class="comment-date">{{ comment.createdAt | date:'MMM d, y' }}</span>
+                </div>
+
+                <!-- View mode -->
+                <p *ngIf="editingId !== comment._id" class="comment-text">{{ comment.content }}</p>
+
+                <!-- Edit mode -->
+                <div *ngIf="editingId === comment._id" class="comment-edit">
+                  <textarea [(ngModel)]="editContent" class="form-textarea" rows="3"></textarea>
+                  <div class="comment-edit-actions">
+                    <button class="btn btn-primary btn-sm" (click)="saveEdit(comment)">Save</button>
+                    <button class="btn btn-ghost btn-sm" (click)="cancelEdit()">Cancel</button>
+                  </div>
+                </div>
+
+                <!-- Actions -->
+                <div *ngIf="canEditComment(comment) && editingId !== comment._id"
+                     class="comment-actions">
+                  <button class="action-btn" (click)="startEdit(comment)">Edit</button>
+                  <button class="action-btn danger" (click)="deleteComment(comment)">Delete</button>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="comments.length === 0" class="empty-state" style="padding: 40px 0;">
+              <p>No comments yet. Start the discussion!</p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>

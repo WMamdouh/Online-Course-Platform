@@ -17,7 +17,7 @@ export const paginationValidator = [
 export const idParamValidator = [
   param("id")
     .notEmpty().withMessage("ID param is required")
-    .isMongoId().withMessage("Invalid ID format – must be a valid MongoDB ObjectId"),
+    .isMongoId().withMessage("Invalid ID format - must be a valid MongoDB ObjectId"),
 ];
 
 

@@ -1,0 +1,29 @@
+<article class="course-card" [routerLink]="['/courses', course._id]">
+  <!-- Thumbnail -->
+  <div class="card-thumb">
+    <img *ngIf="course.thumbnail" [src]="course.thumbnail" [alt]="course.title" />
+    <div *ngIf="!course.thumbnail" class="card-thumb-placeholder">
+      <span>📚</span>
+    </div>
+    <span class="card-category badge badge-amber">{{ course.category }}</span>
+    <span *ngIf="!course.isPublished" class="card-draft badge badge-muted">Draft</span>
+  </div>
+
+  <!-- Body -->
+  <div class="card-body">
+    <h3 class="card-title">{{ course.title }}</h3>
+    <p class="card-desc">{{ course.description | slice:0:90 }}{{ course.description.length > 90 ? '…' : '' }}</p>
+
+    <div class="card-instructor">
+      <span class="inst-avatar">{{ getInstructorName().charAt(0) }}</span>
+      <span class="inst-name">{{ getInstructorName() }}</span>
+    </div>
+
+    <div class="card-footer">
+      <app-star-rating [value]="course.averageRating" [showValue]="true" />
+      <span class="card-price">
+        {{ course.price === 0 ? 'Free' : '$' + course.price }}
+      </span>
+    </div>
+  </div>
+</article>

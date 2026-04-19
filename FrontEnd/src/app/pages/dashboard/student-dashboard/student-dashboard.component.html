@@ -1,0 +1,80 @@
+<div class="container section animate-fade-in-up">
+
+  <!-- Header -->
+  <div class="dash-header">
+    <div>
+      <h1>My Learning</h1>
+      <p>Welcome back, <span class="text-accent">{{ auth.currentUser()?.name }}</span></p>
+    </div>
+    <a routerLink="/courses" class="btn btn-primary">Browse Courses</a>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num">{{ enrollments.length }}</div>
+      <div class="stat-label">Enrolled</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">{{ getInProgressCount() }}</div>
+      <div class="stat-label">In Progress</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num text-success">{{ getCompletedCount() }}</div>
+      <div class="stat-label">Completed</div>
+    </div>
+  </div>
+
+  <!-- Loading / Error -->
+  <div *ngIf="loading" class="loading-wrapper"><div class="spinner"></div></div>
+  <div *ngIf="errorMsg" class="alert alert-error">{{ errorMsg }}</div>
+
+  <!-- Enrolled Courses -->
+  <div *ngIf="!loading">
+    <h2 class="section-title">My Courses</h2>
+
+    <div *ngIf="enrollments.length === 0" class="empty-state">
+      <div class="empty-state-icon">📚</div>
+      <h3>No courses yet</h3>
+      <p>Start learning by enrolling in a course</p>
+      <a routerLink="/courses" class="btn btn-primary mt-3">Browse Courses</a>
+    </div>
+
+    <div class="enrollments-grid">
+      <div *ngFor="let enrollment of enrollments" class="enrollment-card">
+        <ng-container *ngIf="getCourse(enrollment) as course">
+
+          <div class="enrollment-thumb">
+            <img *ngIf="course.thumbnail" [src]="course.thumbnail" [alt]="course.title" />
+            <div *ngIf="!course.thumbnail" class="thumb-placeholder">📚</div>
+          </div>
+
+          <div class="enrollment-body">
+            <span class="badge badge-amber">{{ course.category }}</span>
+            <h3>{{ course.title }}</h3>
+
+            <!-- Progress -->
+            <div class="progress-wrap">
+              <div class="flex-between mb-1">
+                <span class="progress-label">Progress</span>
+                <span class="progress-pct">{{ enrollment.progressPercent }}%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill" [style.width.%]="enrollment.progressPercent"></div>
+              </div>
+            </div>
+
+            <div *ngIf="enrollment.completedAt" class="completed-tag">
+              ✓ Completed {{ enrollment.completedAt | date:'MMM d, y' }}
+            </div>
+
+            <a [routerLink]="['/courses', course._id]" class="btn btn-outline btn-sm">
+              {{ enrollment.progressPercent === 0 ? 'Start Learning' : enrollment.progressPercent === 100 ? 'Review' : 'Continue' }}
+            </a>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+</div>
